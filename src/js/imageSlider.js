@@ -5,6 +5,10 @@ export default class ImageSlider {
 
   #slideWidth = 0;
 
+  #intervalId;
+
+  #isAutoPlay = true;
+
   sliderWrapEl;
 
   sliderListEl;
@@ -15,6 +19,8 @@ export default class ImageSlider {
 
   indicatorWrapEl;
 
+  controlWrapEl;
+
   constructor() {
     this.assignElement();
     this.initSliderNumber();
@@ -23,6 +29,7 @@ export default class ImageSlider {
     this.addEvent();
     this.createIndicator();
     this.setIndicator();
+    this.initAutoPlay();
   }
 
   assignElement() {
@@ -31,6 +38,12 @@ export default class ImageSlider {
     this.nextBtnEl = this.sliderWrapEl.querySelector('#next');
     this.previousBtnEl = this.sliderWrapEl.querySelector('#previous');
     this.indicatorWrapEl = this.sliderWrapEl.querySelector('#indicator-wrap');
+    this.controlWrapEl = this.sliderWrapEl.querySelector('#control-wrap');
+  }
+
+  initAutoPlay() {
+    this.#intervalId = setInterval(this.moveToRight.bind(this), 3000);
+    this.#isAutoPlay = true;
   }
 
   initSliderNumber() {
@@ -53,6 +66,10 @@ export default class ImageSlider {
     this.sliderListEl.style.left = `-${
       this.#currentPosition * this.#slideWidth
     }px`;
+    if (this.#isAutoPlay) {
+      clearInterval(this.#intervalId);
+      this.#intervalId = setInterval(this.moveToRight.bind(this), 3000);
+    }
     this.setIndicator();
   }
 
@@ -64,6 +81,10 @@ export default class ImageSlider {
     this.sliderListEl.style.left = `-${
       this.#currentPosition * this.#slideWidth
     }px`;
+    if (this.#isAutoPlay) {
+      clearInterval(this.#intervalId);
+      this.#intervalId = setInterval(this.moveToRight.bind(this), 3000);
+    }
     this.setIndicator();
   }
 
@@ -74,6 +95,21 @@ export default class ImageSlider {
       'click',
       this.onClickIndicator.bind(this),
     );
+    this.controlWrapEl.addEventListener('click', this.togglePlay.bind(this));
+  }
+
+  togglePlay(event) {
+    if (event.target.dataset.status === 'play') {
+      this.#isAutoPlay = true;
+      this.controlWrapEl.classList.add('play');
+      this.controlWrapEl.classList.remove('pause');
+      this.#intervalId = setInterval(this.moveToRight.bind(this), 3000);
+    } else if (event.target.dataset.status === 'pause') {
+      this.#isAutoPlay = false;
+      this.controlWrapEl.classList.add('pause');
+      this.controlWrapEl.classList.remove('play');
+      clearInterval(this.#intervalId);
+    }
   }
 
   createIndicator() {
